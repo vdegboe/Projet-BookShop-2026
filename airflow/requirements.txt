@@ -1,0 +1,5 @@
+dbt-core
+dbt-snowflake
+psycopg2-binary
+snowflake-connector-python[pandas]
+pandas

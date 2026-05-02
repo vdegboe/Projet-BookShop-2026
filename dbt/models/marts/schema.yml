@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: obt_sales
+    description: "One Big Table regroupant toutes les informations de ventes pour le reporting."
+    columns:
+      - name: VENTE_ID
+        tests:
+          - unique
+          - not_null

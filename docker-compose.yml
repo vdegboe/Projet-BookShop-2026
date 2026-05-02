@@ -1,0 +1,140 @@
+
+x-airflow-common: &airflow-common
+  build: ./airflow
+  env_file: .env
+  environment:
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres-airflow/airflow
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'false'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: 'true'
+    # Snowflake Credentials
+    SNOWFLAKE_ACCOUNT:    ${SNOWFLAKE_ACCOUNT}
+    SNOWFLAKE_USER:       ${SNOWFLAKE_USER}
+    SNOWFLAKE_PASSWORD:   ${SNOWFLAKE_PASSWORD}
+    SNOWFLAKE_ROLE:       ${SNOWFLAKE_ROLE}
+    SNOWFLAKE_WAREHOUSE:  ${SNOWFLAKE_WAREHOUSE}
+    SNOWFLAKE_DATABASE:   ${SNOWFLAKE_DATABASE}
+    # PostgreSQL Source Credentials
+    PG_HOST:              postgres-local
+    PG_PORT:              "5432"
+    PG_DB:                ${PG_DB}
+    PG_USER:              ${PG_USER}
+    PG_PASSWORD:          ${PG_PASSWORD}
+  volumes:
+    - ./airflow/dags:/opt/airflow/dags
+    - ./dbt:/opt/dbt
+    - ./ingestion:/opt/ingestion
+    - airflow-logs:/opt/airflow/logs
+  depends_on:
+    postgres-airflow:
+      condition: service_healthy
+
+services:
+
+  postgres-local:
+    image: postgres:15
+    container_name: bookshop_postgres
+    environment:
+      POSTGRES_DB:       ${PG_DB}
+      POSTGRES_USER:     ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} -d ${PG_DB}"]
+      interval: 10s
+      retries: 5
+
+  postgres-airflow:
+    image: postgres:15
+    container_name: airflow_postgres
+    environment:
+      POSTGRES_DB:       airflow
+      POSTGRES_USER:     airflow
+      POSTGRES_PASSWORD: airflow
+    volumes:
+      - airflow-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 10s
+      retries: 5
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow_init
+    command: >
+      bash -c "
+        # sleep 10 &&
+        airflow db init &&
+        airflow users create
+          --username admin
+          --password admin
+          --firstname Admin
+          --lastname Bookshop
+          --role Admin
+          --email admin@bookshop.com
+      "
+    restart: on-failure
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow_webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      retries: 5
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow_scheduler
+    command: scheduler
+    restart: always
+
+  dbt:
+    build: ./dbt
+    container_name: bookshop_dbt
+    env_file: .env
+    environment:
+      SNOWFLAKE_ACCOUNT:   ${SNOWFLAKE_ACCOUNT}
+      SNOWFLAKE_USER:      ${SNOWFLAKE_USER}
+      SNOWFLAKE_PASSWORD:  ${SNOWFLAKE_PASSWORD}
+      SNOWFLAKE_ROLE:      ${SNOWFLAKE_ROLE}
+      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE}
+      SNOWFLAKE_DATABASE:  ${SNOWFLAKE_DATABASE}
+    volumes:
+      - ./dbt:/opt/dbt
+      - ./ingestion:/opt/ingestion
+    working_dir: /opt/dbt
+    command: tail -f /dev/null
+
+  streamlit:
+    build: ./streamlit
+    container_name: bookshop_streamlit
+    env_file: .env
+    environment:
+      SNOWFLAKE_ACCOUNT:   ${SNOWFLAKE_ACCOUNT}
+      SNOWFLAKE_USER:      ${SNOWFLAKE_USER}
+      SNOWFLAKE_PASSWORD:  ${SNOWFLAKE_PASSWORD}
+      SNOWFLAKE_ROLE:      ${SNOWFLAKE_ROLE}
+      SNOWFLAKE_WAREHOUSE: ${SNOWFLAKE_WAREHOUSE}
+      SNOWFLAKE_DATABASE:  ${SNOWFLAKE_DATABASE}
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./streamlit:/app
+    depends_on:
+      - airflow-webserver
+
+volumes:
+  pg-data:
+  airflow-pg:
+  airflow-logs:

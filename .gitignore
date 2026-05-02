@@ -1,0 +1,10 @@
+.env
+target/
+dbt_packages/
+logs/
+airflow-logs/
+__pycache__/
+*.pyc
+.DS_Store
+a-suppr/
+~$*

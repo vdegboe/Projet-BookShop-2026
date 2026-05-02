@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: fact_ventes
+    columns:
+      - name: MOIS
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre']
+      - name: JOUR
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
+
+  - name: fact_factures
+    columns:
+      - name: MOIS
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre']
+      - name: JOUR
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']

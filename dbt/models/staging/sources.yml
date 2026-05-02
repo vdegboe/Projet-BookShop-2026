@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: raw
+    database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+    schema: RAW
+    tables:
+      - name: CATEGORY
+      - name: BOOKS
+      - name: CUSTOMERS
+      - name: FACTURES
+      - name: VENTES

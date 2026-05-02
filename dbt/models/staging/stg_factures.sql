@@ -1,0 +1,10 @@
+SELECT
+    ID,
+    CODE,
+    TO_DATE(DATE_EDIT, 'YYYYMMDD') AS DATE_EDIT,
+    CUSTOMERS_ID,
+    QTE_TOTALE,
+    TOTAL_AMOUNT,
+    TOTAL_PAID,
+    CREATED_AT
+FROM {{ source('raw', 'FACTURES') }}
