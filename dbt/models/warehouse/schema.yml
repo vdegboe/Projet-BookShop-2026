@@ -4,25 +4,21 @@ models:
   - name: fact_ventes
     columns:
       - name: MOIS
-        tests:
+        data_tests:
           - accepted_values:
-              arguments:
-                values: ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre']
+              values: ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre']
       - name: JOUR
-        tests:
+        data_tests:
           - accepted_values:
-              arguments:
-                values: ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
+              values: ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
 
   - name: fact_factures
     columns:
       - name: MOIS
-        tests:
+        data_tests:
           - accepted_values:
-              arguments:
-                values: ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre']
+              values: ['janvier', 'fevrier', 'mars', 'avril', 'mai', 'juin', 'juillet', 'aout', 'septembre', 'octobre', 'novembre', 'decembre']
       - name: JOUR
-        tests:
+        data_tests:
           - accepted_values:
-              arguments:
-                values: ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']
+              values: ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche']

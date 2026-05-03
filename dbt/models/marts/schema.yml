@@ -5,6 +5,6 @@ models:
     description: "One Big Table regroupant toutes les informations de ventes pour le reporting."
     columns:
       - name: VENTE_ID
-        tests:
+        data_tests:
           - unique
           - not_null

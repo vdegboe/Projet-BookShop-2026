@@ -68,12 +68,23 @@ def get_conn():
         warehouse=os.getenv('SNOWFLAKE_WAREHOUSE', 'COMPUTE_WH'),
         database=os.getenv('SNOWFLAKE_DATABASE', 'BOOKSHOP'),
         schema='MARTS',
+        client_session_keep_alive=True,
     )
 
 @st.cache_data(ttl=300, show_spinner=False)
 def requete(sql: str) -> pd.DataFrame:
     try:
         return pd.read_sql(sql, get_conn())
+    except snowflake.connector.errors.DatabaseError as e:
+        if getattr(e, 'errno', None) == 390114:
+            get_conn.clear()
+            try:
+                return pd.read_sql(sql, get_conn())
+            except Exception as e2:
+                st.error(f"Erreur Snowflake après reconnexion : {e2}")
+                return pd.DataFrame()
+        st.error(f"Erreur Snowflake : {e}")
+        return pd.DataFrame()
     except Exception as e:
         st.error(f"Erreur de connexion Snowflake : {e}")
         return pd.DataFrame()
