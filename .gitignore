@@ -1,10 +1,41 @@
+# Environment
 .env
+.env.local
+.env.*.local
+
+# Build outputs
 target/
 dbt_packages/
 logs/
 airflow-logs/
+
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+ENV/
+
+# IDE
 .DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Project specific
 a-suppr/
 ~$*
+
+# Secrets (additional safety)
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+secrets.yml
